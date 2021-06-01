@@ -1,0 +1,18 @@
+{
+  "name": "kimosabe-docs",
+  "version": "0.0.1",
+  "description": "kimosabe api docs",
+  "main": "index.js",
+  "scripts": {
+    "start": "redoc-cli serve --watch schema.yaml",
+    "build": "redoc-cli bundle -o index.html schema.yaml"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/6rotoms/kimosabe-docs.git"
+  },
+  "homepage": "https://github.com/6rotoms/kimosabe-docs#readme",
+  "devDependencies": {
+    "redoc-cli": "^0.11.4"
+  }
+}
