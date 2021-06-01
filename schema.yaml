@@ -1,0 +1,850 @@
+openapi: 3.0.0
+# Added by API Auto Mocking Plugin
+servers:
+- description: SwaggerHub API Auto Mocking
+  url: https://virtserver.swaggerhub.com/6rotoms/kimosabe-api/0.0.1
+info:
+  description: Backend API for kimosabe.
+  version: "0.0.1"
+  title: Kimosabe-api
+  contact:
+    email: you@your-company.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+- name: auth
+- name: comment
+- name: games
+- name: groups
+- name: user
+paths:
+  /auth/login:
+    post:
+      tags:
+      - auth
+      summary: login a user
+      operationId: loginUser
+      description: |
+        Logs in user, and creates a Session-Id httpOnly cookie that is used by
+        backend api for all queries asking for a cookie.
+      responses:
+        '200':
+          description: user logged in
+        '401':
+          description: username/password incorrect
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDetails'
+        description: user info
+  /auth/register:
+    post:
+      tags:
+        - auth
+      summary: create a user
+      operationId: registerUser
+      description: |
+        Create a user account. Password and Username must be greater than 3
+        characters.
+      responses:
+        '200':
+          description: user created
+        '400':
+          description: 'invalid input, object invalid'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+        '409':
+          description: username taken
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationDetails'
+        description: user info
+  /auth/verify:
+    post:
+      tags:
+        - auth
+      summary: verify a user's account
+      operationId: verifyUser
+      description: |
+        Verify a user account by passing in a verification token.
+      parameters:
+      - in: query
+        name: token
+        required: true
+        description: token string for verification
+        schema:
+          type: string
+      responses:
+        '200':
+          description: verification success
+      
+  /comment/{commentId}:
+    post:
+      tags:
+      - comment
+      summary: post a comment as a reply to some comment
+      operationId: postComment
+      description: |
+        Post a comment in reply to a commentId, where commentId can
+        be a comment or a post
+      parameters:
+      - in: path
+        name: commentId
+        required: true
+        description: comment id
+        schema:
+          type: string
+      responses:
+        '200':
+          description: successfully commented
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+      security:
+      - cookie_auth: []
+  /games/{gameSlug}:
+    get:
+      tags:
+      - games
+      summary: get game info
+      operationId: getGameInfo
+      description: |
+        By passing in the appropriate options, you can search for
+        available inventory in the system
+      parameters:
+      - in: path
+        name: gameSlug
+        required: true
+        description: group slug
+        schema:
+          type: string
+      responses:
+        '200':
+          description: at most 25 paged results
+        '400':
+          description: bad input parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+  /games:
+    get:
+      tags:
+      - games
+      summary: searches games
+      operationId: searchGames
+      description: |
+        By passing in the appropriate options, you can search for
+        available inventory in the system
+      parameters:
+      - in: query
+        name: searchTerm
+        description: pass an optional search string for looking up inventory
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: pageNum
+        description: page of search, starting at 0
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+      responses:
+        '200':
+          description: at most 25 paged results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SearchResponse'
+        '400':
+          description: bad query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+  /games/searchSummary:
+    get:
+      tags:
+      - games
+      summary: game search summary
+      operationId: searchSummary
+      description: |
+        By passing in the appropriate options, this will return a summary 
+        of the search.
+      parameters:
+      - in: query
+        name: searchString
+        description: pass an optional search string for looking up inventory
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: at most 25 paged results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchSummary'
+        '400':
+          description: bad query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+  /groups/{groupSlug}:
+    get:
+      tags:
+      - groups
+      summary: get group information
+      operationId: getGroup
+      description: |
+        Get group information
+      parameters: 
+      - in: path
+        name: groupSlug
+        required: true
+        description: group slug id
+        schema:
+          type: string
+      responses:
+        '200':
+          description: group fetch successful
+        '404':
+          description: group or game does not exist (specified in error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+    post:
+      tags:
+      - groups
+      summary: create a group
+      operationId: createGroup
+      description: |
+        Create a group
+      parameters: 
+      - in: path
+        name: groupSlug
+        required: true
+        description: group slug id
+        schema:
+          type: string
+      responses:
+        '200':
+          description: creation successful
+        '401':
+          description: user not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+        '403':
+          description: user not verified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+        '404':
+          description: game slug id does not match any igdb slug
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+        '409':
+          description: group with id already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+      security:
+      - cookie_auth: []
+  /groups/{groupSlug}/join:
+    post:
+      tags:
+      - groups
+      summary: join a group
+      operationId: joinGroup
+      description: |
+        Join a group
+      parameters: 
+      - in: path
+        name: groupSlug
+        required: true
+        description: group slug
+        schema:
+          type: string
+      responses:
+        '200':
+          description: join successful
+        '404':
+          description: group does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+      security:
+      - cookie_auth: []
+  /groups/{groupSlug}/subgroups/{subgroupSlug}:
+    post:
+      tags:
+      - groups
+      summary: create new subgroup
+      operationId: createSubgroup
+      description: create a new subgroup with name subgroupSlug
+      parameters: 
+      - in: path
+        name: subgroupSlug
+        required: true
+        description: subgroup slug
+        schema:
+          type: string
+      - in: path
+        name: groupSlug
+        required: true
+        description: group slug
+        schema:
+          type: string
+      responses:
+        '200':
+          description: group created
+        '400': 
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubgroupInfo'
+        description: Group info required for creation
+      security:
+      - cookie_auth: []
+    put:
+      tags:
+      - groups
+      summary: update a subgroup
+      operationId: updateSubgroup
+      description: update subgroup with name subgroupSlug
+      parameters: 
+      - in: path
+        name: subgroupSlug
+        required: true
+        description: subgroup slug
+        schema:
+          type: string
+      - in: path
+        name: groupSlug
+        required: true
+        description: group slug
+        schema:
+          type: string
+      responses:
+        '200':
+          description: group created
+        '400': 
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubgroupInfo'
+        description: Group info required for creation
+      security:
+      - cookie_auth: []
+    delete:
+      tags:
+      - groups
+      summary: delete a subgroup
+      operationId: deleteSubgroup
+      description: delete subgroup with name subgroupSlug
+      parameters: 
+      - in: path
+        name: subgroupSlug
+        required: true
+        description: subgroup slug
+        schema:
+          type: string
+      - in: path
+        name: groupSlug
+        required: true
+        description: group slug
+        schema:
+          type: string
+      responses:
+        '200':
+          description: group created
+        '400': 
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+      security:
+      - cookie_auth: []
+    get:
+      tags:
+        - groups
+      summary: get subgroup info
+      operationId: getSubgroup
+      description: get subgroup with subgroupSlug
+      parameters: 
+      - in: path
+        name: subgroupSlug
+        required: true
+        description: subgroup slug
+        schema:
+          type: string
+      - in: path
+        name: groupSlug
+        required: true
+        description: group slug
+        schema:
+          type: string
+      responses:
+        '200':
+          description: group info returned
+        '400': 
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+  /user/changePassword:
+    post:
+      tags:
+      - user
+      summary: change logged in user's password
+      operationId: changePassword
+      description: Change password of user.
+      responses:
+        '200':
+          description: success
+        '400':
+          description: 'invalid password'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDetails'
+        description: Old and new password json object
+      security:
+      - cookie_auth: []
+  /user/friends:
+    post:
+      tags:
+      - user
+      summary: send friend request
+      operationId: createfriendRequest
+      description: |
+        Send a friend request to user with username `friendUsername`.
+      responses:
+        '200':
+          description: request sent
+        '400':
+          description: 'invalid input, object invalid'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFriendRequest'
+        description: Inventory item to add
+      security:
+      - cookie_auth: []
+    put:
+      tags:
+      - user
+      summary: accept/deny friend request
+      operationId: acceptfriendRequest
+      description: |
+        Accept or deny a friend request.
+      responses:
+        '200':
+          description: response successfully sent
+        '400':
+          description: invalid input, object invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptFriendRequest'
+        description: Inventory item to add
+      security:
+      - cookie_auth: []
+  /user/friends/{username}:
+    delete:
+      tags:
+      - user
+      summary: delete friend relationship
+      operationId: deleteFriendRelationship
+      description: |
+        Delete a friend relationship to user with username 'username'
+      parameters:
+        - in: path
+          name: username
+          schema:
+            type: string
+          required: true
+          description: username of friend to delete
+      responses:
+        '200':
+          description: friend successfully removed
+      security:
+      - cookie_auth: []
+  /user/profile:
+    put:
+      tags:
+        - user
+      summary: Partial update of user object
+      operationId: putUserProfileInfo
+      description: |
+        update user info of logged in user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutUserProfileInfo'
+      responses:
+        '200':
+          description: update successful
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+      security:
+      - cookie_auth: []
+  /user/profile/{username}:
+    get:
+      tags:
+        - user
+      summary: Get a user by username
+      operationId: getUserInfo
+      description: |
+        get a users info from their username
+      parameters:
+        - in: path
+          name: username
+          schema:
+            type: string
+          required: true
+          description: username of user to get
+      responses:
+        '200':
+          description: response valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileInfo'
+        '404':
+          description: 'user not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+  /user/profile/{username}/friends:
+    get:
+      tags:
+        - user
+      summary: Get a users friends by their username
+      operationId: getUserFriends
+      description: |
+        get users friends info from their username
+      parameters:
+        - in: path
+          name: username
+          schema:
+            type: string
+          required: true
+          description: username of user friends to get
+      responses:
+        '200':
+          description: response valid
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserInfo'
+        '404':
+          description: 'user not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+  /user/profile/{username}/groups:
+    get:
+      tags:
+        - user
+      summary: Get groups user belongs to
+      operationId: getUserGroups
+      description: |
+        get a list of user groups from username
+      parameters:
+        - in: path
+          name: username
+          schema:
+            type: string
+          required: true
+          description: username of user groups to get
+      responses:
+        '200':
+          description: response valid
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupInfo'
+        '404':
+          description: 'user not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+components:
+  schemas:
+    ExceptionResponse:
+      type: object
+      required:
+        - message
+        - statusCode
+      properties:
+        message:
+          type: string
+          format: string
+          example: "this is some error message"
+          description: message describing error
+        statusCode:
+          type: number
+          format: string
+          example: 400
+          description: status code of response
+        errors:
+          type: array
+          items:
+            type: string
+            example: 
+              - this is one specific error
+              - this is another specific error
+    CreateFriendRequest:
+      type: object
+      required:
+        - friendUsername
+      properties:
+        friendUsername:
+          type: string
+          format: string
+          example: user1
+          description: username of other user
+    AcceptFriendRequest:
+      type: object
+      required:
+      - from
+      properties:
+        from:
+          type: string
+          format: string
+          example: user1
+          description: username user who send friend request
+        accept:
+          type: boolean
+          format: boolean
+          example: true
+          description: |
+            whether or not to accept friend request.
+            if not given, defaults to false.
+    LoginDetails:
+      type: object
+      required:
+      - username
+      - password
+      properties:
+        username:
+          type: string
+          format: string
+          example: user1
+        password:
+          type: string
+          example: password1
+    RegistrationDetails:
+      type: object
+      required:
+      - username
+      - email
+      - password
+      properties:
+        username:
+          type: string
+          format: string
+          example: user1
+        email:
+          type: string
+          format: string
+          example: user1@example.com
+        password:
+          type: string
+          example: password1
+    UserProfileInfo:
+      type: object
+      properties:
+        userInfo:
+          $ref: "#/components/schemas/UserInfo"
+        age:
+          type: number
+          format: number
+          example: 18
+        gender:
+          type: string
+          format: string
+          example: "Female"
+        location:
+          type: string
+          format: string
+          example: "California"
+        biography:
+          type: string
+          format: string
+          example: "Greetings from where it never rains!"
+        lastLogin:
+          type: string
+          format: date
+          example: "2020-10-26T06:21:01.933514Z"
+    PutUserProfileInfo:
+      type: object
+      properties:
+        userInfo:
+          $ref: "#/components/schemas/UserInfo"
+        age:
+          type: number
+          format: number
+          example: 18
+        gender:
+          type: string
+          format: string
+          example: "Female"
+        location:
+          type: string
+          format: string
+          example: "California"
+        biography:
+          type: string
+          format: string
+          example: "Greetings from where it never rains!"
+    UserInfo:
+      type: object
+      properties:
+        username:
+          type: string
+          format: string
+          example: friend_user
+        profileIcon:
+          type: string
+          format: string
+          example: https://path.to.file.com
+    GroupInfo:
+      type: object
+      properties:
+        groupName:
+          type: string
+          format: string
+          example: baldurs gate iii
+        thumbUrl:
+          type: string
+          format: string
+          example: https://path.to.file.com
+    SubgroupInfo:
+      type: object
+      required:
+      - groupName
+      properties:
+        subgroupDescription:
+          type: string
+          format: string
+          example: LFG for casual players
+        subgroupName:
+          type: string
+          format: string
+          example: Casual LFG
+    SearchSummary:
+      type: object
+      properties:
+        maxNumPages:
+          type: number
+          format: number
+          example: 200
+        searchTerm:
+          type: string
+          format: string
+          example: baldurs gate
+        numSearchResults:
+          type: number
+          format: number
+          example: 2495
+    SearchResponse:
+      type: object
+      properties:
+        name:
+          type: string
+          format: string
+          example: baldurs gate
+        coverUrl:
+          type: string
+          format: string
+          example: https://path.to.file.com
+        thumbUrl:
+          type: string
+          format: string
+          example: https://path.to.file.com
+        summary:
+          type: string
+          format: string
+          example: "info about baldurs gate here"
+        id:
+          type: string
+          format: string
+          example: "baldurs-gate"
+          description: game slug
+  securitySchemes:
+    cookie_auth:
+      type: apiKey
+      name: JSESSIONID
+      in: cookie
