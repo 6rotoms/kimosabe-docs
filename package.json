@@ -4,8 +4,8 @@
   "description": "kimosabe api docs",
   "main": "index.js",
   "scripts": {
-    "start": "redoc-cli serve --watch schema.yaml",
-    "build": "redoc-cli bundle -o index.html schema.yaml"
+    "start": "redoc-cli serve --watch --options=theme.json --template=template.hbs schema.yaml",
+    "build": "redoc-cli bundle -o index.html --options=theme.json --template=template.hbs schema.yaml"
   },
   "repository": {
     "type": "git",
