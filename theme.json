@@ -1,0 +1,48 @@
+{
+  "theme": {
+    "colors": {
+      "text": {
+        "primary": "#3b4252",
+        "secondary": "#4c566a"
+      },
+      "gray": {
+        "50": "#000000",
+        "100": "#000000"
+      },
+      "http": {
+        "get": "#a3be8c",
+        "post": "#88c0d0",
+        "put": "#b48ead",
+        "delete": "#bf616a"
+      },
+      "success": {
+        "main": "#a3be8c"
+      },
+      "error": {
+        "main": "#bf616a"
+      }
+    },
+    "schema": {
+      "linesColor": "#ebcb8b",
+      "requireLabelColor": "#d08770"
+    },
+    "sidebar": {
+      "backgroundColor": "#2e3440",
+      "textColor": "#e5e9f0",
+      "activeTextColor": "#eceff4"
+    },
+    "rightPanel": {
+      "textColor": "#ffffff",
+      "backgroundColor": "#4c566a"
+    },
+    "typography": {
+      "fieldName": {
+        "color": "#e5e9f0"
+      },
+      "code": {
+        "color": "#d08770",
+        "backgroundColor": "#4c566a"
+      }
+    }
+  }
+}
