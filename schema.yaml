@@ -683,6 +683,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExceptionResponse'
+      security:
+        - cookie_auth: []
     delete:
       tags:
         - User
@@ -706,6 +708,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExceptionResponse'
+      security:
+        - cookie_auth: []
 components:
   schemas:
     ExceptionResponse:
